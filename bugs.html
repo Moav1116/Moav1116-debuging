@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fa"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <title>گزارش باگ | مرکز امنیت سامسونگ</title>
+
+  <style>
+    :root{
+      --bg-light:linear-gradient(to left,#f5f7fa,#c3cfe2);
+      --bg-dark:#121212;
+      --text-dark:#ffffff;
+      --card-bg-light:#ffffff;
+      --card-bg-dark:#1e1e1e;
+    }
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg-light);font-family:Vazirmatn,sans-serif;direction:rtl;transition:all .25s ease;}
+    body.dark-mode{background:var(--bg-dark);color:var(--text-dark);}
+    body.dark-mode .pill-card{background:var(--card-bg-dark);color:var(--text-dark);}
+    .pill-card{background:var(--card-bg-light);border-radius:1.6rem;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.06);margin-bottom:24px;transition:all .3s;}
+    .hero{min-height:40vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#0d6efd;color:#fff;border-radius:0 0 40px 40px;margin-bottom:60px}
+    .navbar-bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ccc;display:flex;justify-content:space-around;padding:6px 0;z-index:1000}
+    .navbar-bottom a{text-decoration:none;color:#0d6efd;font-size:13px;text-align:center}
+    .navbar-bottom i{font-size:20px;display:block;margin-bottom:3px}
+    body.dark-mode .navbar-bottom{background:#1e1e1e;border-color:#444}
+    body.dark-mode .navbar-bottom a{color:#fff}
+    .toggle-btn{position:fixed;top:10px;left:10px;z-index:1010}
+  </style>
+</head>
+<body>
+<button class="btn btn-outline-dark toggle-btn" onclick="toggleTheme()">🌓</button>
+<div class="container mt-5 pt-4">
+  <h2 class="mb-3"><i class="fas fa-bug icon"></i> گزارش باگ جدید</h2>
+  <form id="bugForm" class="pill-card">
+    <div class="mb-3"><label class="form-label">رمز عبور</label><input type="password" id="password" class="form-control" required></div>
+    <div class="mb-3"><label class="form-label">عنوان باگ</label><input type="text" id="title" class="form-control" required></div>
+    <div class="mb-3"><label class="form-label">توضیحات</label><textarea id="description" rows="4" class="form-control" required></textarea></div>
+    <div class="mb-3"><label class="form-label">شناسه CVE (اختیاری)</label><input type="text" id="cve" class="form-control"></div>
+    <button class="btn btn-primary" type="submit">افزودن</button>
+    <div id="bugMsg" class="mt-3"></div>
+  </form>
+  <h2 class="mb-3 mt-5"><i class="fas fa-list icon"></i> باگ‌های ثبت‌شده</h2>
+  <div id="bugList"></div>
+</div>
+
+  <nav class="navbar-bottom">
+    <a href="about.html"><i class="fas fa-user"></i>درباره</a>
+    <a href="bugs.html"><i class="fas fa-bug"></i>باگ‌ها</a>
+    <a href="skills.html"><i class="fas fa-star"></i>مهارت‌ها</a>
+    <a href="contact.html"><i class="fas fa-envelope"></i>تماس</a>
+  </nav>
+
+  <script>
+    // theme persistence
+    (function(){
+      const stored=localStorage.getItem('theme');
+      if(stored==='dark'){document.body.classList.add('dark-mode');}
+    })();
+    function toggleTheme(){
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme',document.body.classList.contains('dark-mode')?'dark':'light');
+    }
+  </script>
+<script>
+const STORAGE_KEY='bugs';
+function loadBugs(){
+  const list=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  const container=document.getElementById('bugList');
+  container.innerHTML='';
+  list.forEach(b=>{
+    const div=document.createElement('div');
+    div.className='pill-card';
+    div.innerHTML=`<h5>${b.title}</h5><p>${b.desc}</p>${b.cve?'<p><strong>CVE:</strong> '+b.cve+'</p>':''}`;
+    container.prepend(div);
+  });
+}
+document.addEventListener('DOMContentLoaded',loadBugs);
+document.getElementById('bugForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const pw=document.getElementById('password').value.trim();
+  if(pw!=='matksecret'){
+    document.getElementById('bugMsg').innerHTML='<span class="text-danger">رمز اشتباه است.</span>';
+    return;
+  }
+  const title=document.getElementById('title').value.trim();
+  const desc=document.getElementById('description').value.trim();
+  const cve=document.getElementById('cve').value.trim();
+  const list=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  list.unshift({title:title,desc:desc,cve:cve});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
+  loadBugs();
+  document.getElementById('bugForm').reset();
+  document.getElementById('bugMsg').innerHTML='<span class="text-success">باگ ثبت شد.</span>';
+});
+</script>
+</body></html>
